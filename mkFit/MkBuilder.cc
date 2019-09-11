@@ -1274,7 +1274,7 @@ void MkBuilder::score_tracks(TrackVec& tracks)
   for (auto & track : tracks)
   {
     assignSeedTypeForRanking(track);
-    track.setCandScore(getScoreCand(track));
+    track.setScore(getScoreCand(track));
   }
 }
 
@@ -1320,7 +1320,7 @@ void MkBuilder::find_duplicates(TrackVec& tracks)
 	  if(fracHitsShared < Config::minFracHitsShared) continue;
 	}
 	//Keep track with best score
-	if(track.getCandScore() > track2.getCandScore())
+	if(track.score() > track2.score())
 	{
 	  track2.setDuplicateValue(true);
 	}
@@ -1924,7 +1924,7 @@ void MkBuilder::FindTracksStandard()
               else if (first_short)
               {
                 first_short = false;
-                if (tmp_cands[is][ii].getCandScore() > eoccs[start_seed+is].m_best_short_cand.getCandScore())
+                if (tmp_cands[is][ii].score() > eoccs[start_seed+is].m_best_short_cand.score())
                 {
                   eoccs[start_seed+is].m_best_short_cand = tmp_cands[is][ii];
                 }
@@ -2117,10 +2117,10 @@ void MkBuilder::find_tracks_in_layers(CandCloner &cloner, MkFinder *mkfndr,
 
       for (int i = 0; i < ((int) cc.size()) - 1; ++i)
       {
-        if (cc[i].getCandScore() < cc[i+1].getCandScore())
+        if (cc[i].score() < cc[i+1].score())
         {
           printf("CloneEngine - NOT SORTED: layer=%d, iseed=%d (size=%llu)-- %d : %d smaller than %d : %d\n",
-                 curr_layer, iseed, cc.size(), i, cc[i].getCandScore(), i+1, cc[i+1].getCandScore());
+                 curr_layer, iseed, cc.size(), i, cc[i].score(), i+1, cc[i+1].score());
         }
       }
     }

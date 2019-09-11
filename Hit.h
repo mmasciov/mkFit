@@ -188,8 +188,16 @@ class Hit
 {
 public:
   Hit() : mcHitID_(-1) {}
+
   Hit(const SVector3& position, const SMatrixSym33& error, int mcHitID = -1)
-    : state_(position, error), mcHitID_(mcHitID) {}
+    : state_(position, error), mcHitID_(mcHitID)
+  {}
+
+  Hit(const SVector3& position, const SMatrixSym33& error, int mcHitID,
+      unsigned int id, unsigned int adc, unsigned int sphi, unsigned int stheta)
+    : state_(position, error), mcHitID_(mcHitID),
+      pdata_(id, adc, sphi, stheta)
+  {}
 
   ~Hit(){}
 
@@ -251,10 +259,34 @@ public:
   int mcHitID() const { return mcHitID_; }
   int layer(const MCHitInfoVec& globalMCHitInfo) const { return globalMCHitInfo[mcHitID_].layer(); }
   int mcTrackID(const MCHitInfoVec& globalMCHitInfo) const { return globalMCHitInfo[mcHitID_].mcTrackID(); }
-  
+
+  struct PackedData {
+    union {
+      struct {
+        unsigned int detid_in_layer : 12;
+        unsigned int sum_adc        : 10;
+        unsigned int span_phi       :  5;
+        unsigned int span_theta     :  5;
+      };
+      unsigned int _raw_;
+    };
+
+    PackedData() : _raw_(0) {}
+
+    PackedData(unsigned int id, unsigned int adc, unsigned int sphi, unsigned int stheta) :
+      detid_in_layer(id), sum_adc(adc), span_phi(sphi), span_theta(stheta)
+    {}
+  };
+
+  unsigned int detIDinLayer() const { return pdata_.detid_in_layer; }
+  unsigned int sumAdc()       const { return pdata_.sum_adc; }
+  unsigned int spanPhi()      const { return pdata_.span_phi; }
+  unsigned int spanTheta()    const { return pdata_.span_theta; }
+
 private:
   MeasurementState state_;
-  int mcHitID_;
+  int              mcHitID_;
+  PackedData       pdata_;
 };
 
 typedef std::vector<Hit> HitVec;
