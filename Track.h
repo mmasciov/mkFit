@@ -298,7 +298,7 @@ public:
   CUDA_CALLABLE
   Track() {}
 
-  Track(const TrackBase& base) :
+  explicit Track(const TrackBase& base) :
     TrackBase(base)
   {
     // Reset hit counters -- caller has to initialize hits.
@@ -320,6 +320,10 @@ public:
   Track(int charge, const SVector3& position, const SVector3& momentum,
         const SMatrixSym66& errors, float chi2) :
     TrackBase(charge, position, momentum, errors, chi2)
+  {}
+
+  Track(const Track &t) :
+    Track(t.state(), t.chi2(), t.label(), t.nTotalHits(), t.hitsOnTrk_.data())
   {}
 
   CUDA_CALLABLE

@@ -157,8 +157,10 @@ public:
 
   void BkFitInputTracks (TrackVec& cands, int beg, int end);
   void BkFitOutputTracks(TrackVec& cands, int beg, int end);
-  void BkFitInputTracks (EventOfCombCandidates& eocss, int beg, int end);
-  void BkFitOutputTracks(EventOfCombCandidates& eocss, int beg, int end);
+
+  // QQQQQ - out until further notice
+  // void BkFitInputTracks (EventOfCombCandidates& eocss, int beg, int end);
+  // void BkFitOutputTracks(EventOfCombCandidates& eocss, int beg, int end);
 
   void BkFitFitTracks(const EventOfHits& eventofhits, const SteeringParams& st_par,
                       const int N_proc, bool chiDebug = false);

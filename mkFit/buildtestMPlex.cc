@@ -285,7 +285,9 @@ double runBuildingTestPlexStandard(Event& ev, MkBuilder& builder)
   // now do backwards fit... do we want to time this section?
   if (Config::backwardFit)
   {
-    builder.BackwardFit();
+    // QQQQ Using the TrackVec version until we home in on THE backward fit etc.
+    // builder.BackwardFit();
+    builder.BackwardFitBH();
 
     check_nan_n_silly_bkfit(ev);
 
@@ -348,7 +350,9 @@ double runBuildingTestPlexCloneEngine(Event& ev, MkBuilder& builder)
   // now do backwards fit... do we want to time this section?
   if (Config::backwardFit)
   {
-    builder.BackwardFit();
+    // QQQQ Using the TrackVec version until we home in on THE backward fit etc.
+    // builder.BackwardFit();
+    builder.BackwardFitBH();
 
     check_nan_n_silly_bkfit(ev);
 

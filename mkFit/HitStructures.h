@@ -279,7 +279,7 @@ class TrackCand : public TrackBase
 public:
   TrackCand() {}
 
-  TrackCand(const TrackBase& base, CombCandidate* ccand) :
+  explicit TrackCand(const TrackBase& base, CombCandidate* ccand) :
     TrackBase(base),
     m_comb_candidate(ccand)
   {

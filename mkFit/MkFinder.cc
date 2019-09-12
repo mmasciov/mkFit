@@ -884,6 +884,8 @@ void MkFinder::BkFitInputTracks(TrackVec& cands, int beg, int end)
 
 //------------------------------------------------------------------------------
 
+/* QQQQ - out until further notice
+
 void MkFinder::BkFitInputTracks(EventOfCombCandidates& eocss, int beg, int end)
 {
   // XXXX Can cause trouble if per-seed vectors get scattered beyond 2GB (or maybe 8).
@@ -912,7 +914,7 @@ void MkFinder::BkFitInputTracks(EventOfCombCandidates& eocss, int beg, int end)
 
   Err[iC].Scale(100.0f);
 }
-
+*/
 
 void MkFinder::BkFitOutputTracks(TrackVec& cands, int beg, int end)
 {
@@ -934,6 +936,8 @@ void MkFinder::BkFitOutputTracks(TrackVec& cands, int beg, int end)
     }
 }
 
+/* QQQQ - out until further notice
+
 void MkFinder::BkFitOutputTracks(EventOfCombCandidates& eocss, int beg, int end)
 {
   // Only copy out track params / errors / chi2, all the rest is ok.
@@ -953,6 +957,8 @@ void MkFinder::BkFitOutputTracks(EventOfCombCandidates& eocss, int beg, int end)
     }
   }
 }
+*/
+
 
 } // end namespace mkfit
 //------------------------------------------------------------------------------

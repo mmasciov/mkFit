@@ -2163,7 +2163,7 @@ void MkBuilder::FindTracksFV()
 void MkBuilder::find_tracks_in_layersFV(int start_seed, int end_seed, int region)
 {
 #ifdef INSTANTIATE_FV
-  EventOfCombCandidates  &eoccs             = m_event_of_comb_cands;
+  // QQQQ EventOfCombCandidates  &eoccs             = m_event_of_comb_cands;
   const SteeringParams   &st_par            = m_steering_params[region];
   const TrackerInfo      &trk_info          = Config::TrkInfo;
 
@@ -2181,7 +2181,11 @@ void MkBuilder::find_tracks_in_layersFV(int start_seed, int end_seed, int region
   for (int index = 0; index < nMplx; ++index) {
     for (int offset = 0; offset < MkFinderFv::Seeds; ++offset) {
       dprint("seed " << iseed << " index " << index << " offset " << offset);
-      finders[index].InputTrack(eoccs.m_candidates[iseed][0], iseed, offset, false);
+
+      // QQQQ InputTrack for TrackCand does not exist ... see what to do.
+      //
+      // finders[index].InputTrack(eoccs.m_candidates[iseed][0], iseed, offset, false);
+
       ++iseed;
       iseed = std::min(iseed, end_seed-1);
     }
@@ -2348,6 +2352,10 @@ void MkBuilder::fit_cands_BH(MkFinder *mkfndr, int start_cand, int end_cand, int
 
 void MkBuilder::BackwardFit()
 {
+  // QQQQ - decide what / how to do it
+
+  assert (false && "Currently not supported");
+
   EventOfCombCandidates &eoccs = m_event_of_comb_cands;
 
   tbb::parallel_for_each(m_regions.begin(), m_regions.end(),
@@ -2408,7 +2416,7 @@ void MkBuilder::fit_cands(MkFinder *mkfndr, int start_cand, int end_cand, int re
   redo_fit:
 #endif
     // input tracks
-    mkfndr->BkFitInputTracks(eoccs, icand, end);
+    // QQQQQ mkfndr->BkFitInputTracks(eoccs, icand, end);
 
     // fit tracks back to first layer
     mkfndr->BkFitFitTracks(m_event_of_hits, st_par, end - icand, chi_debug);
@@ -2434,7 +2442,7 @@ void MkBuilder::fit_cands(MkFinder *mkfndr, int start_cand, int end_cand, int re
     }
 #endif
 
-    mkfndr->BkFitOutputTracks(eoccs, icand, end); 
+    // QQQQQ mkfndr->BkFitOutputTracks(eoccs, icand, end);
 
     // printf("Post Final fit for %d - %d\n", icand, end);
     // for (int i = icand; i < end; ++i) { const Track &t = eoccs[i][0];
