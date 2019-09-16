@@ -409,13 +409,13 @@ public:
   int getLastFoundHitPos() const
   {
     int hi = lastHitIdx_;
-    while (hitsOnTrk_[hi].index < 0) --hi;
+    while (hi >= 0 && hitsOnTrk_[hi].index < 0) --hi;
     return hi;
   }
 
-  HitOnTrack getLastFoundHitOnTrack() const { return hitsOnTrk_[getLastFoundHitPos()]; }
-  int        getLastFoundHitIdx()     const { return hitsOnTrk_[getLastFoundHitPos()].index; }
-  int        getLastFoundHitLyr()     const { return hitsOnTrk_[getLastFoundHitPos()].layer; }
+  HitOnTrack getLastFoundHitOnTrack() const { int p = getLastFoundHitPos(); return p >= 0 ? hitsOnTrk_[p] : HitOnTrack(-1, -1); }
+  int        getLastFoundHitIdx()     const { int p = getLastFoundHitPos(); return p >= 0 ? hitsOnTrk_[p].index : -1; }
+  int        getLastFoundHitLyr()     const { int p = getLastFoundHitPos(); return p >= 0 ? hitsOnTrk_[p].layer : -1; }
 
   int getLastFoundMCHitID(const std::vector<HitVec>& globalHitVec) const
   {
