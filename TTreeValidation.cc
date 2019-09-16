@@ -1428,9 +1428,6 @@ void TTreeValidation::fillEfficiencyTree(const Event& ev)
 
   for (const auto& simtrack : evt_sim_tracks)
   {
-    // QQQQ why does this suddenly happen now?
-    if (simtrack.nFoundHits() < 1) continue;
-
     // clear the branches first
     if (Config::keepHitInfo)
     {
