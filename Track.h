@@ -323,7 +323,8 @@ public:
   {}
 
   Track(const Track &t) :
-    Track(t.state(), t.chi2(), t.label(), t.nTotalHits(), t.hitsOnTrk_.data())
+    TrackBase  (t),
+    hitsOnTrk_ (t.hitsOnTrk_)
   {}
 
   CUDA_CALLABLE
@@ -436,7 +437,6 @@ public:
     return mcHitID;
   }
 
-  // QQQQ Why do we still need those????
   const HitOnTrack* getHitsOnTrackArray() const { return hitsOnTrk_.data(); }
   const HitOnTrack* BeginHitsOnTrack()    const { return hitsOnTrk_.data(); }
   const HitOnTrack* EndHitsOnTrack()      const { return hitsOnTrk_.data() + (lastHitIdx_ + 1); }
@@ -515,8 +515,7 @@ public:
     return layers;
   }
 
-  // QQQQ Fix with proper copy ctor ... no need for raw arrays.
-  CUDA_CALLABLE Track clone() const { return Track(state_,chi2_,label_,nTotalHits(),hitsOnTrk_.data()); }
+  CUDA_CALLABLE Track clone() const { return Track(*this); }
 
 
 private:
@@ -568,7 +567,8 @@ inline float getScoreCalc(const unsigned int seedtype,
                           const float pt)
 {
   // QQQQ Mario, Allie ... do we want to change this now that score is a float?
-  // Comment below needs to be fixed for sure :)
+  // In particular, we probably don't need Config::maxChi2ForRanking any more.
+  // Comments below need to be updated.
 
   //// Do not allow for chi2<0 in score calculation
   //if(chi2<0) chi2=0.f;

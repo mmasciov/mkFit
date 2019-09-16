@@ -108,7 +108,8 @@ namespace Config
   // XXXX This needs to be generalized for other geometries !
   // TrackerInfo more or less has all this information (or could have it).
   extern    int   nTotalLayers;          // To be set by geometry plugin.
-  constexpr int   nMaxTrkHits      = 48; // Used for array sizes in MkFitter
+  constexpr int   nMaxTrkHits      = 64; // Used for array sizes in MkFitter/Finder, max hits in toy MC
+  constexpr int   nAvgSimHits      = 32; // Used for reserve() calls for sim hits/states
 
   constexpr float fRadialSpacing   = 4.;
   constexpr float fRadialExtent    = 0.01;
@@ -197,12 +198,6 @@ namespace Config
   constexpr float varXY       = Config::hitposerrXY * Config::hitposerrXY;
   constexpr float varZ        = Config::hitposerrZ  * Config::hitposerrZ;
   constexpr float varR        = Config::hitposerrR  * Config::hitposerrR;
-
-  // XXMT4K OK ... what do we do with this guy? MaxTotHit / AvgTotHit ... ?
-  // For now setting it to nMaxTrkLayers which is too big ... but it seems to be
-  // only used for vector::reserve() ...
-  // QQQQ This again .... removed nMaxSimHits so changed this to nMaxTrkHits.
-  constexpr int nTotHit = Config::nMaxTrkHits;
 
   // scattering simulation
   constexpr float X0 = 9.370; // cm, from http://pdg.lbl.gov/2014/AtomicNuclearProperties/HTML/silicon_Si.html // Pb = 0.5612 cm

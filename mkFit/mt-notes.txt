@@ -17,8 +17,8 @@ export TBB_PREFIX=$TBB_ROOT
 .  /cvmfs/cms.cern.ch/slc7_amd64_gcc630/external/gdb/7.12.1-omkpbe2/etc/profile.d/init.sh
 .  /cvmfs/cms.cern.ch/slc7_amd64_gcc630/external/valgrind/3.13.0-omkpbe/etc/profile.d/init.sh
 
-mkFit/mkFit --cmssw-n2seeds --input-file mu-1000.bin --build-std
-mkFit/mkFit --cmssw-n2seeds --input-file pu70-ccc-10.bin --build-std --quality-val --num-events 10
+mkFit/mkFit --cmssw-n2seeds --input-file /data2/mu-hs.bin --build-std
+mkFit/mkFit --cmssw-n2seeds --input-file /data2/pu70-ccc-hs.bin --build-std --quality-val --num-events 10
 
 
 TrackBase, TrackCand, storage of cand hits into a tree structure

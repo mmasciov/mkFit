@@ -123,8 +123,8 @@ void Event::RemapHits(TrackVec & tracks)
 void Event::Simulate()
 {
   simTracks_.resize(Config::nTracks);
-  simHitsInfo_.reserve(Config::nTotHit * Config::nTracks);
-  simTrackStates_.reserve(Config::nTotHit * Config::nTracks);
+  simHitsInfo_.reserve(Config::nAvgSimHits * Config::nTracks);
+  simTrackStates_.reserve(Config::nAvgSimHits * Config::nTracks);
 
   for (auto&& l : layerHits_) {
     l.clear();

@@ -406,8 +406,6 @@ void TTreeValidation::initializeConfigTree()
   configtree_->Branch("varXY",&varXY_);
   configtree_->Branch("varZ",&varZ_);
 
-  configtree_->Branch("nTotHit",&nTotHit_);
-
   configtree_->Branch("ptinverr049",&ptinverr049_);
   configtree_->Branch("phierr049",&phierr049_);
   configtree_->Branch("thetaerr049",&thetaerr049_);
@@ -830,7 +828,6 @@ void TTreeValidation::setTrackExtras(Event& ev)
     const auto& cmsswtracks = ev.cmsswTracks_;
     const auto& cmsswextras = ev.cmsswTracksExtra_;
     const auto& seedtracks = ev.seedTracks_;
-    // QQQQ gcc unused -- const auto& seedextras = ev.seedTracksExtra_;
     const auto& buildtracks = ev.candidateTracks_;
           auto& buildextras = ev.candidateTracksExtra_;
     const auto& fittracks   = ev.fitTracks_;
@@ -1037,7 +1034,7 @@ void TTreeValidation::makeSeedTkToCMSSWTkMap(Event& ev)
 void TTreeValidation::makeCMSSWTkToSeedTkMap(Event& ev)
 {
   const auto& seedtracks  = ev.seedTracks_;
-  // QQQQ gcc unused -- const auto& cmsswtracks = ev.cmsswTracks_;
+
   for (const auto & seedToCmsswPair : seedToCmsswMap_)
   {
     const auto seedlabel  = seedToCmsswPair.first; // !! in cmssw validation, seed label != seed index in vector as they are not aligned!! --> need to find itrack!
@@ -2347,8 +2344,6 @@ void TTreeValidation::fillConfigTree()
   varXY_ = Config::varXY;
   varZ_  = Config::varZ;
   
-  nTotHit_ = Config::nTotHit;
-
   ptinverr049_ = Config::ptinverr049;
   phierr049_   = Config::phierr049;
   thetaerr049_ = Config::thetaerr049;
