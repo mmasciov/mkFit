@@ -383,6 +383,8 @@ int main(int argc, char *argv[])
   vector<float>*  pix_yz = 0;
   vector<float>*  pix_zz = 0;
   vector<float>*  pix_zx = 0;
+  vector<int>*    pix_csize_col = 0;
+  vector<int>*    pix_csize_row = 0;
   //these were renamed in CMSSW_9_1_0: auto-detect
   bool has910_det_lay = t->GetBranch("pix_det") == nullptr;
   if (has910_det_lay){
@@ -402,6 +404,8 @@ int main(int argc, char *argv[])
   t->SetBranchAddress("pix_yz",&pix_yz);
   t->SetBranchAddress("pix_zz",&pix_zz);
   t->SetBranchAddress("pix_zx",&pix_zx);
+  t->SetBranchAddress("pix_clustSizeCol",&pix_csize_col);
+  t->SetBranchAddress("pix_clustSizeRow",&pix_csize_row);
 
   vector<vector<int> >*    pix_simHitIdx = 0;
   t->SetBranchAddress("pix_simHitIdx", &pix_simHitIdx);
@@ -461,6 +465,7 @@ int main(int argc, char *argv[])
   vector<float>*  str_zz = 0;
   vector<float>*  str_zx = 0;
   vector<float>*  str_chargePerCM = 0;
+  vector<int>*    str_csize = 0;
   t->SetBranchAddress("str_isBarrel",&str_isBarrel);
   t->SetBranchAddress("str_isStereo",&str_isStereo);
   if (has910_det_lay){
@@ -482,6 +487,7 @@ int main(int argc, char *argv[])
   t->SetBranchAddress("str_zz",&str_zz);
   t->SetBranchAddress("str_zx",&str_zx);
   t->SetBranchAddress("str_chargePerCM",&str_chargePerCM);
+  t->SetBranchAddress("str_clustSize", &str_csize);
 
   vector<vector<int> >*    str_simHitIdx = 0;
   t->SetBranchAddress("str_simHitIdx", &str_simHitIdx);
@@ -899,7 +905,8 @@ int main(int argc, char *argv[])
 	//cout << "xxx ipix=" << ipix << " recTrack=" << pixHitRecIdx[ipix][ir] << endl;
       	cmsswTracks_[pixHitRecIdx[ipix][ir]].addHitIdx(layerHits_[ilay].size(), ilay, 0);//per-hit chi2 is not known
       }
-      Hit hit(pos, err, totHits, imoduleid, 0, 0, 0); // QQQQ to set (quantized) adc, phi/theta span
+      Hit hit(pos, err, totHits);
+      hit.setupAsPixel(imoduleid, pix_csize_row->at(ipix), pix_csize_col->at(ipix));
       layerHits_[ilay].push_back(hit);
       MCHitInfo hitInfo(simTkIdx, ilay, layerHits_[ilay].size()-1, totHits);
       simHitsInfo_.push_back(hitInfo);
@@ -982,8 +989,9 @@ int main(int argc, char *argv[])
       }
       if(passCCC)
 	{
-	  Hit hit(pos, err, totHits, imoduleid, 0, 0, 1); // QQQQ to set (quantized) adc, phi span (assuming theta span = 1)
-	  layerHits_[ilay].push_back(hit);
+          Hit hit(pos, err, totHits);
+          hit.setupAsStrip(imoduleid, str_chargePerCM->at(istr), str_csize->at(istr));
+          layerHits_[ilay].push_back(hit);
 	  MCHitInfo hitInfo(simTkIdx, ilay, layerHits_[ilay].size()-1, totHits);
 	  simHitsInfo_.push_back(hitInfo);
 	  totHits++;
