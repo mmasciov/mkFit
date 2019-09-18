@@ -6,6 +6,7 @@ With GC's cluster info etc ... testing
 
 ./writeMemoryFile --input ~slava77/data-buffer/CMSSW_10_4_0_patch1-tkNtuple/pass-925bb57/initialStep/default/11024.0_TTbar_13/AVE_70_BX01_25ns/trackingNtuple.root --output ../../pu70-ccc-hs.bin --clean-sim-tracks --apply-ccc --write-rec-tracks &
 
+./writeMemoryFile --input ~slava77/data-buffer/CMSSW_10_4_0_patch1-tkNtuple/pass-925bb57/initialStep/default/11024.0_TTbar_13/AVE_50_BX01_25ns/trackingNtuple.root --output ../../pu50-ccc-hs.bin --clean-sim-tracks --apply-ccc --write-rec-tracks &
 
 Data-format change: Hit gets module id, cluster info, Track now uses std::vector<HitOnTrack>
 --------------------------------------------------------------------------------------------
