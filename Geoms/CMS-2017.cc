@@ -4,6 +4,7 @@
 
 #include "Config.h"
 #include "TrackerInfo.h"
+#include "mkFit/SteeringParams.h"
 
 using namespace mkfit;
 
@@ -11,15 +12,27 @@ namespace
 {
 #include "CMS-2017.acc"
 
-  void Create_CMS_2017(TrackerInfo& ti, bool verbose)
+  void Create_IterationConfig_iter0(TrackerInfo& ti, IterationParams& ip){
+    
+    thisIter = IterationConfig::IterationConfig(ti, ip);
+
+  }
+
+  void Create_CMS_2017(TrackerInfo& ti, IterationParams& ip, unsigned int iter=0, bool verbose)
   {
+    
+    if (iter==0)
+      Create_IterationConfig_iter0(ti, ip);
+
     Config::nTotalLayers     = 18 + 2 * 27;
 
     Config::useCMSGeom       = true;
     Config::nlayers_per_seed = 4;
-    Config::maxCandsPerSeed  = 6;  // GC said 3 is enough ???
-    Config::maxHolesPerCand  = 3; // = 12;
-    Config::chi2Cut          = 15.0; // = 30.0;
+
+//The following are commented out, since now set by IterationConfig (once per iteration)
+//    Config::maxCandsPerSeed  = 6;  // GC said 3 is enough ???
+//    Config::maxHolesPerCand  = 3; // = 12;
+//    Config::chi2Cut          = 15.0; // = 30.0;
 
     Config::finding_requires_propagation_to_hit_pos = true;
     Config::finding_inter_layer_pflags = PropagationFlags(PF_apply_material);
