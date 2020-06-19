@@ -30,9 +30,10 @@ namespace
     Config::nlayers_per_seed = 4;
 
 //The following are commented out, since now set by IterationConfig (once per iteration)
-//    Config::maxCandsPerSeed  = 6;  // GC said 3 is enough ???
-//    Config::maxHolesPerCand  = 3; // = 12;
-//    Config::chi2Cut          = 15.0; // = 30.0;
+//    Config::maxCandsPerSeed  = 5;
+//    Config::maxHolesPerCand  = 4;
+//    Config::maxConsecHoles   = 1;
+//    Config::chi2Cut          = 30;
 
     Config::finding_requires_propagation_to_hit_pos = true;
     Config::finding_inter_layer_pflags = PropagationFlags(PF_apply_material);

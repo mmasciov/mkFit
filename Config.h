@@ -297,6 +297,7 @@ namespace Config
 
   extern    int maxCandsPerSeed; // default: 6; cms: 6  (GC had 3)
   extern    int maxHolesPerCand; // default: 2; cms  12 (should be reduced)
+  extern    int maxConsecHoles;
   extern    int maxCandsPerEtaBin;
 
   extern    bool mtvLikeValidation;
@@ -354,8 +355,8 @@ namespace Config
   constexpr float track_ptlow = 0.9;
 
   // sorting config (bonus,penalty)
-  constexpr float validHitBonus_ = 7.5;//cmssw bonus = 2.5
-  constexpr float missingHitPenalty_ = 5.0;//cmssw penalty = 20
+  constexpr float validHitBonus_ = 10;
+  constexpr float missingHitPenalty_ = 10;
   // QQQQ do we still need this?
   constexpr float maxChi2ForRanking_ = 819.2f; // (=0.5f*0.1f*pow(2,14);)
 
@@ -393,8 +394,8 @@ namespace Config
 
   constexpr bool nan_n_silly_check_seeds      = true;
   constexpr bool nan_n_silly_print_bad_seeds  = false;
-  constexpr bool nan_n_silly_fixup_bad_seeds  = false;
-  constexpr bool nan_n_silly_remove_bad_seeds = true;
+  constexpr bool nan_n_silly_fixup_bad_seeds  = true;
+  constexpr bool nan_n_silly_remove_bad_seeds = false;
 
   constexpr bool nan_n_silly_check_cands_every_layer     = false;
   constexpr bool nan_n_silly_print_bad_cands_every_layer = false;

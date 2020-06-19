@@ -671,7 +671,8 @@ void MkFinder::FindCandidates(const LayerOfHits &layer_of_hits,
       continue;
     }
 
-    int fake_hit_idx = num_all_minus_one_hits(itrack) < Config::maxHolesPerCand ? -1 : -2;
+    // int fake_hit_idx = num_all_minus_one_hits(itrack) < Config::maxHolesPerCand ? -1 : -2;
+    int fake_hit_idx = ( (num_all_minus_one_hits(itrack) < Config::maxHolesPerCand) && (NTailMinusOneHits(itrack, 0, 0)<=Config::maxConsecHoles) ) ? -1 : -2;
 
     if (XWsrResult[itrack].m_wsr == WSR_Edge)
     {
@@ -781,7 +782,8 @@ void MkFinder::FindCandidatesCloneEngine(const LayerOfHits &layer_of_hits, CandC
       continue;
     }
 
-    int fake_hit_idx = num_all_minus_one_hits(itrack) < Config::maxHolesPerCand ? -1 : -2;
+    // int fake_hit_idx = num_all_minus_one_hits(itrack) < Config::maxHolesPerCand ? -1 : -2;
+    int fake_hit_idx = ( (num_all_minus_one_hits(itrack) < Config::maxHolesPerCand) && (NTailMinusOneHits(itrack, 0, 0)<=Config::maxConsecHoles) ) ? -1 : -2;
 
     if (XWsrResult[itrack].m_wsr == WSR_Edge)
     {
@@ -995,7 +997,7 @@ void MkFinder::BkFitFitTracks(const EventOfHits   & eventofhits,
     {
       while (CurHit[i] >= 0 && HoTArr[ i ][ CurHit[i] ].index < 0) --CurHit[i];
 
-      if (HoTArr[ i ][ CurHit[i] ].layer == layer)
+      if (CurHit[i] >= 0 && HoTArr[ i ][ CurHit[i] ].layer == layer)
       {
         const Hit &hit = L.GetHit( HoTArr[ i ][ CurHit[i] ].index );
         msErr.CopyIn(i, hit.errArray());
