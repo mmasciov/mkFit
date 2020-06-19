@@ -27,9 +27,9 @@ namespace
     Config::nTotalLayers     = 18 + 2 * 27;
 
     Config::useCMSGeom       = true;
-    Config::nlayers_per_seed = 4;
 
 //The following are commented out, since now set by IterationConfig (once per iteration)
+//    Config::nlayers_per_seed = 4;
 //    Config::maxCandsPerSeed  = 5;
 //    Config::maxHolesPerCand  = 4;
 //    Config::maxConsecHoles   = 1;
