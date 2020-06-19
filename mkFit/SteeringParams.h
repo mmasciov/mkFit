@@ -151,6 +151,7 @@ class IterationParams
 {
   // Stuff moved out from Config, like:
   
+  int nlayers_per_seed = 4;
   int maxCandsPerSeed  = 5;
   int maxHolesPerCand  = 4;
   int maxConsecHoles   = 1;
