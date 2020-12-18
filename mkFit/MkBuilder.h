@@ -87,6 +87,7 @@ extern ExecutionContext g_exe_ctx;
 //==============================================================================
 
 class Event;
+class IterationConfig;
 
 class MkBuilder
 {
@@ -147,7 +148,7 @@ public:
   void end_event();
 
   void create_seeds_from_sim_tracks();
-  void import_seeds();
+  //void import_seeds(); //Moved to SteeringParams.h as virtual, then defined in Geoms/CMS-2017.cc
   void find_seeds();
   void assign_seedtype_forranking();
   void fit_seeds();
