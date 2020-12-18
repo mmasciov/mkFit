@@ -10,7 +10,7 @@
 #include "Debug.h"
 
 #include <array>
-#include <tbb/tbb.h>
+#include "tbb/concurrent_vector.h"
 
 namespace mkfit {
 
