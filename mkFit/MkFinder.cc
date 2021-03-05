@@ -410,12 +410,12 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 	    
 #ifdef DUMPHITWINDOW
 
-	    //const MCHitInfo &mchinfo = m_event->simHitsInfo_[L.GetHit(hi).mcHitID()];
-	    //int mchid = mchinfo.mcTrackID();
-	    //Track simtrack =  m_event->simTracks_[mchid];
-	    //int st_isfindable = (int) simtrack.isFindable();
-	    //int st_label = simtrack.label();
-	    //int st_prodtype = (int) simtrack.prodType();
+	    const MCHitInfo &mchinfo = m_event->simHitsInfo_[L.GetHit(hi).mcHitID()];
+	    int mchid = mchinfo.mcTrackID();
+	    Track simtrack =  m_event->simTracks_[mchid];
+	    int st_isfindable = (int) simtrack.isFindable();
+	    int st_label = simtrack.label();
+	    int st_prodtype = (int) simtrack.prodType();
 
 	    static bool first = true;
 	    if (first)
@@ -426,7 +426,7 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 		       "trk_cnt/I:trk_idx/I:trk_label/I:"
 		       "trk_pt/F:trk_eta/F:trk_phi/F:trk_chi2/F:"
 		       "seed_idx/I:seed_label/I:seed_algo/I:"
-		       //"hit_mcid/I:st_isfindable/I:st_prodtype/I:st_label/I:"
+		       "hit_mcid/I:st_isfindable/I:st_prodtype/I:st_label/I:"
 		       "nhits/I:"
 		       "trk_q/F:hit_q/F:dq_trkhit/F:dq_cut/F:trk_phi/F:hit_phi/F:dphi_trkhit/F:dphi_cut/F"
 		       "\n");
@@ -439,7 +439,7 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 		   "%d %d %d "
 		   "%6.3f %6.3f %6.3f %6.3f "
 		   "%d %d %d "
-		   //"%d %d %d %d"
+		   "%d %d %d %d "
 		   "%d "
 		   "%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f"
 		   "\n",
@@ -448,7 +448,7 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 		   itrack, CandIdx(itrack, 0, 0), Label(itrack, 0, 0),
 		   1.0f/Par[iI].At(itrack,3,0), getEta(Par[iI].At(itrack,5,0)), phi, Chi2(itrack, 0, 0), 
 		   SeedIdx(itrack, 0, 0), SeedLabel(itrack, 0, 0), SeedAlgo(itrack, 0, 0),
-		   //mchid, st_isfindable, st_prodtype, st_label, 
+		   mchid, st_isfindable, st_prodtype, st_label, 
 		   NFoundHits(itrack, 0, 0),
 		   q, L.m_hit_qs[hi], ddq, dq, phi, L.m_hit_phis[hi], ddphi, dphi);
 #endif
