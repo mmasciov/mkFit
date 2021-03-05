@@ -15,8 +15,6 @@
 //#include "Event.h"
 //#endif
 
-#define DUMPHITWINDOW
-
 #ifdef DUMPHITWINDOW
 #include "Event.h"
 #endif
@@ -409,9 +407,10 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
             const float ddphi = cdist(std::abs(phi - L.m_hit_phis[hi]));
 	    
 #ifdef DUMPHITWINDOW
-
+	    {
 	    const MCHitInfo &mchinfo = m_event->simHitsInfo_[L.GetHit(hi).mcHitID()];
 	    int mchid = mchinfo.mcTrackID();
+	    if (mchid < 0) goto screw_it;
 	    Track simtrack =  m_event->simTracks_[mchid];
 	    int st_isfindable = (int) simtrack.isFindable();
 	    int st_label = simtrack.label();
@@ -451,6 +450,8 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 		   mchid, st_isfindable, st_prodtype, st_label, 
 		   NFoundHits(itrack, 0, 0),
 		   q, L.m_hit_qs[hi], ddq, dq, phi, L.m_hit_phis[hi], ddphi, dphi);
+	    }
+	  screw_it:
 #endif
 	    
             if (ddq >= dq)

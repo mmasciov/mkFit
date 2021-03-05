@@ -18,8 +18,6 @@
 // Set this to select a single track for deep debugging:
 //#define SELECT_SEED_LABEL -494
 
-#define DUMPHITWINDOW
-
 namespace mkfit {
 ExecutionContext g_exe_ctx;
 } // end namespace mkfit

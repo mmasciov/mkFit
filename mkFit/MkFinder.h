@@ -96,10 +96,6 @@ public:
 //  Event     *m_event;
 //#endif
 
-#ifdef DUMPHITWINDOW
-  Event     *m_event;
-#endif
-
   // Hit indices into LayerOfHits to explore.
   WSR_Result  XWsrResult[NN]; // Could also merge it with XHitSize. Or use smaller arrays.
   MPlexQI     XHitSize;
@@ -115,10 +111,6 @@ public:
   // Track errors / parameters propagated to current hit.
   // MPlexLS    candErrAtCurrHit;
   // MPlexLV    candParAtCurrHit;
-
-  const IterationParams      *m_iteration_params       = nullptr;
-  const IterationLayerConfig *m_iteration_layer_config = nullptr;
-  const std::vector<bool>    *m_iteration_hit_mask     = nullptr;
 
   //============================================================================
 
@@ -227,6 +219,14 @@ public:
   void BkFitPropTracksToPCA(const int N_proc);
 
   //----------------------------------------------------------------------------
+
+#ifdef DUMPHITWINDOW
+  Event     *m_event;
+#endif
+
+  const IterationParams      *m_iteration_params       = nullptr;
+  const IterationLayerConfig *m_iteration_layer_config = nullptr;
+  const std::vector<bool>    *m_iteration_hit_mask     = nullptr;
 
 private:
 
