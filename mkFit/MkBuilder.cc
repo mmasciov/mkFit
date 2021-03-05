@@ -18,6 +18,8 @@
 // Set this to select a single track for deep debugging:
 //#define SELECT_SEED_LABEL -494
 
+#define DUMPHITWINDOW
+
 namespace mkfit {
 ExecutionContext g_exe_ctx;
 } // end namespace mkfit
@@ -2036,6 +2038,10 @@ void MkBuilder::find_tracks_in_layers(CandCloner &cloner, MkFinder *mkfndr,
 
       dprint("now get hit range");
 
+#ifdef DUMPHITWINDOW
+      mkfndr->m_event = m_event;
+#endif      
+      
       mkfndr->SelectHitIndices(layer_of_hits, end - itrack);
 
       find_tracks_handle_missed_layers(mkfndr, layer_info, extra_cands, seed_cand_idx,
