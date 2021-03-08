@@ -14,7 +14,7 @@
 //#define DEBUG_BACKWARD_FIT_BH
 //#define DEBUG_BACKWARD_FIT
 
-#define DUMPHITWINDOW
+//#define DUMPHITWINDOW
 
 namespace mkfit {
 
