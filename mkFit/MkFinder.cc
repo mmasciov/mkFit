@@ -373,6 +373,33 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
     // This would then work best with relatively small bin sizes.
     // Or, set them up so I can always take 3x3 array around the intersection.
 
+    int thisseedmcid=-999999;
+#ifdef DUMPHITWINDOW
+    {
+    int seedlabel = SeedLabel(itrack, 0, 0);
+    TrackVec & seedtracks = m_event->seedTracks_;
+    int thisidx = -999999;
+    for (int i = 0; i < seedtracks.size(); ++i){
+      auto & thisseed = seedtracks[i];
+      if(thisseed.label()==seedlabel){
+	thisidx = i;
+	break;
+      }
+    }
+    if(thisidx>-999999){
+      auto & seedtrack = m_event->seedTracks_[thisidx];
+      //printf("HITWINDOWSEL %d %d %6.3f %6.3f %6.3f", seedlabel, seedtrack.label(), seedtrack.pT(), seedtrack.momEta(), seedtrack.momPhi()); 
+      std::vector<int> thismcHitIDs;
+      seedtrack.mcHitIDsVec(m_event->layerHits_,m_event->simHitsInfo_,thismcHitIDs);
+      if ( std::adjacent_find( thismcHitIDs.begin(), thismcHitIDs.end(), std::not_equal_to<>() ) == thismcHitIDs.end() ){
+	thisseedmcid=thismcHitIDs.at(0);
+      }
+    }
+    //printf(" %d\n", thisseedmcid);
+    }
+#endif
+
+
     for (int qi = qb1; qi < qb2; ++qi)
     {
       for (int pi = pb1; pi < pb2; ++pi)
@@ -410,12 +437,90 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 	    {
 	    const MCHitInfo &mchinfo = m_event->simHitsInfo_[L.GetHit(hi).mcHitID()];
 	    int mchid = mchinfo.mcTrackID();
-	    if (mchid < 0) goto screw_it;
-	    Track simtrack =  m_event->simTracks_[mchid];
-	    int st_isfindable = (int) simtrack.isFindable();
-	    int st_label = simtrack.label();
-	    int st_prodtype = (int) simtrack.prodType();
+	    int st_isfindable=0;
+	    int st_label=-999999;
+	    int st_prodtype=0;
+	    int st_nhits=-1;
+	    int st_charge=0;
+	    float st_r = -999.;
+	    float st_z = -999.;
+	    float st_pt =-999.;
+	    float st_eta=-999.;
+	    float st_phi=-999.;
+	    if (mchid >=0){
+	      Track simtrack =  m_event->simTracks_[mchid];
+	      st_isfindable  = (int) simtrack.isFindable();
+	      st_label       =       simtrack.label();
+	      st_prodtype    = (int) simtrack.prodType();
+	      st_pt          =       simtrack.pT();
+	      st_eta         =       simtrack.momEta();
+	      st_phi         =       simtrack.momPhi();
+	      st_nhits       =       simtrack.nTotalHits();
+	      st_charge      =       simtrack.charge();
+	      st_r           =       simtrack.posR();
+	      st_z           =       simtrack.z();
+	    }
+	    
+	    const Hit &thishit=L.GetHit(hi);
+	    msErr.CopyIn(itrack, thishit.errArray());
+	    msPar.CopyIn(itrack, thishit.posArray());
+	    const FindingFoos tmp_fndfoos_brl = {kalmanPropagateAndComputeChi2      ,kalmanPropagateAndUpdate      ,&MkBase::PropagateTracksToR};
+	    const FindingFoos tmp_fndfoos_ec  = {kalmanPropagateAndComputeChi2Endcap,kalmanPropagateAndUpdateEndcap,&MkBase::PropagateTracksToZ};
 
+	    const FindingFoos &this_fnd_foos = L.is_barrel() ?  tmp_fndfoos_brl : tmp_fndfoos_ec; 
+	    MPlexQF thisOutChi2;
+	    (*this_fnd_foos.m_compute_chi2_foo)(Err[iI], Par[iI], Chg, msErr, msPar,
+						thisOutChi2, N_proc, Config::finding_intra_layer_pflags);
+	    float hx    = thishit.x();
+	    float hy    = thishit.y();
+	    float hz    = thishit.z();
+	    float hr    = std::hypot(hx, hy);
+	    float hphi  = std::atan2(hy, hx);
+	    float hex   = std::sqrt(thishit.exx());
+	    if(std::isnan(hex))
+	      hex = -999.;
+	    float hey   = std::sqrt(thishit.eyy());
+	    if(std::isnan(hey))
+	      hey = -999.;
+	    float hez   = std::sqrt(thishit.ezz());
+	    if(std::isnan(hez))
+	      hez = -999.;
+	    float her   = std::sqrt((hx*hx*thishit.exx() + hy*hy*thishit.eyy() + 2.0f*hx*hy*msErr.At(itrack,0,1)) / (hr*hr));
+	    if(std::isnan(her))
+	      her = -999.;
+	    float hephi = std::sqrt(thishit.ephi());
+	    if(std::isnan(hephi))
+	      hephi = -999.;
+	    float hchi2 = thisOutChi2[itrack];
+	    if(std::isnan(hchi2))
+	      hchi2 = -999.;
+	    float tx    = Par[iI].At(itrack,0,0);
+	    float ty    = Par[iI].At(itrack,1,0);
+	    float tz    = Par[iI].At(itrack,2,0);
+	    float tr    = std::hypot(tx, ty);
+	    float tphi  = std::atan2(ty, tx);
+	    float tchi2 = Chi2(itrack, 0, 0);
+	    if(std::isnan(tchi2))
+	      tchi2 = -999.;
+	    float tex   = std::sqrt(Err[iI].At(itrack,0,0));
+	    if(std::isnan(tex))
+	      tex = -999.;
+	    float tey   = std::sqrt(Err[iI].At(itrack,1,1));
+	    if(std::isnan(tey))
+	      tey = -999.;
+	    float tez   = std::sqrt(Err[iI].At(itrack,2,2));
+	    if(std::isnan(tez))
+	      tez = -999.;
+	    float ter   = std::sqrt((tx*tx*tex*tex + ty*ty*tey*tey + 2.0f*tx*ty*Err[iI].At(itrack,0,1)) / (tr*tr));
+	    if(std::isnan(ter))
+	      ter = -999.;
+	    float tephi = std::sqrt(ty*ty*tex*tex + tx*tx*tey*tey - 2.0f*tx*ty*Err[iI].At(itrack,0,1)/(tr*tr*tr*tr));
+	    if(std::isnan(tephi))
+	      tephi = -999.;
+	    float ht_dxy= std::hypot(hx-tx, hy-ty);
+	    float ht_dz = hz-tz;
+	    float ht_dphi= cdist(std::abs(hphi - tphi));
+	    
 	    static bool first = true;
 	    if (first)
 	      {
@@ -423,35 +528,65 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 		       "evt_id/I:"
 		       "lyr_id/I:lyr_isbrl/I:hit_idx/I:"
 		       "trk_cnt/I:trk_idx/I:trk_label/I:"
-		       "trk_pt/F:trk_eta/F:trk_phi/F:trk_chi2/F:"
-		       "seed_idx/I:seed_label/I:seed_algo/I:"
-		       "hit_mcid/I:st_isfindable/I:st_prodtype/I:st_label/I:"
+		       "trk_pt/F:trk_eta/F:trk_mphi/F:trk_chi2/F:"
 		       "nhits/I:"
-		       "trk_q/F:hit_q/F:dq_trkhit/F:dq_cut/F:trk_phi/F:hit_phi/F:dphi_trkhit/F:dphi_cut/F"
+		       "seed_idx/I:seed_label/I:seed_algo/I:seed_mcid/I:"
+		       "hit_mcid/I:"
+		       "st_isfindable/I:st_prodtype/I:st_label/I:"
+		       "st_pt/F:st_eta/F:st_phi/F:"
+		       "st_nhits/I:st_charge/I:st_r/F:st_z/F:"
+		       "trk_q/F:hit_q/F:dq_trkhit/F:dq_cut/F:trk_phi/F:hit_phi/F:dphi_trkhit/F:dphi_cut/F:"
+		       "t_x/F:t_y/F:t_r/F:t_phi/F:t_z/F:"
+		       "t_ex/F:t_ey/F:t_er/F:t_ephi/F:t_ez/F:"
+		       "h_x/F:h_y/F:h_r/F:h_phi/F:h_z/F:"
+		       "h_ex/F:h_ey/F:h_er/F:h_ephi/F:h_ez/F:"
+		       "ht_dxy/F:ht_dz/F:ht_dphi/F:"
+		       "h_chi2/F"
 		       "\n");
 		first = false;
 	      }
-
-	    printf("HITWINDOWSEL "
-		   "%d "
-		   "%d %d %d "
-		   "%d %d %d "
-		   "%6.3f %6.3f %6.3f %6.3f "
-		   "%d %d %d "
-		   "%d %d %d %d "
-		   "%d "
-		   "%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f"
-		   "\n",
-		   m_event->evtID(),
-		   L.layer_id(), L.is_barrel(), L.GetOriginalHitIndex(hi),
-		   itrack, CandIdx(itrack, 0, 0), Label(itrack, 0, 0),
-		   1.0f/Par[iI].At(itrack,3,0), getEta(Par[iI].At(itrack,5,0)), phi, Chi2(itrack, 0, 0), 
-		   SeedIdx(itrack, 0, 0), SeedLabel(itrack, 0, 0), SeedAlgo(itrack, 0, 0),
-		   mchid, st_isfindable, st_prodtype, st_label, 
-		   NFoundHits(itrack, 0, 0),
-		   q, L.m_hit_qs[hi], ddq, dq, phi, L.m_hit_phis[hi], ddphi, dphi);
+	    
+	    if(!(std::isnan(phi)))
+	      {
+		//|| std::isnan(ter) || std::isnan(her) || std::isnan(Chi2(itrack, 0, 0)) || std::isnan(hchi2)))
+		printf("HITWINDOWSEL "
+		       "%d "
+		       "%d %d %d "
+		       "%d %d %d "
+		       "%6.3f %6.3f %6.3f %6.3f "
+		       "%d "
+		       "%d %d %d %d "
+		       "%d "
+		       "%d %d %d "
+		       "%6.3f %6.3f %6.3f "
+		       "%d %d %6.3f %6.3f "
+		       "%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f "
+		       "%6.3f %6.3f %6.3f %6.3f %6.3f "
+		       "%6.6f %6.6f %6.6f %6.6f %6.6f "
+		       "%6.3f %6.3f %6.3f %6.3f %6.3f "
+		       "%6.6f %6.6f %6.6f %6.6f %6.6f "
+		       "%6.3f %6.3f %6.3f "
+		       "%6.3f"
+		       "\n",
+		       m_event->evtID(),
+		       L.layer_id(), L.is_barrel(), L.GetOriginalHitIndex(hi),
+		       itrack, CandIdx(itrack, 0, 0), Label(itrack, 0, 0),
+		       1.0f/Par[iI].At(itrack,3,0), getEta(Par[iI].At(itrack,5,0)), Par[iI].At(itrack,4,0), Chi2(itrack, 0, 0), 
+		       NFoundHits(itrack, 0, 0),
+		       SeedIdx(itrack, 0, 0), SeedLabel(itrack, 0, 0), SeedAlgo(itrack, 0, 0), thisseedmcid,
+		       mchid, 
+		       st_isfindable, st_prodtype, st_label, 
+		       st_pt, st_eta, st_phi,
+		       st_nhits, st_charge, st_r, st_z,
+		       q, L.m_hit_qs[hi], ddq, dq, phi, L.m_hit_phis[hi], ddphi, dphi,
+		       tx,  ty,  tr,  tphi,  tz,
+		       tex, tey, ter, tephi, tez, 
+		       hx,  hy,  hr,  hphi,  hz,
+		       hex, hey, her, hephi, hez, 
+		       ht_dxy, ht_dz, ht_dphi,
+		       hchi2);
+	      }
 	    }
-	  screw_it:
 #endif
 	    
             if (ddq >= dq)
