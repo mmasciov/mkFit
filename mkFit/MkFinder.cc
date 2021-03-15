@@ -514,7 +514,7 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 	    float ter   = std::sqrt((tx*tx*tex*tex + ty*ty*tey*tey + 2.0f*tx*ty*Err[iI].At(itrack,0,1)) / (tr*tr));
 	    if(std::isnan(ter))
 	      ter = -999.;
-	    float tephi = std::sqrt(ty*ty*tex*tex + tx*tx*tey*tey - 2.0f*tx*ty*Err[iI].At(itrack,0,1)/(tr*tr*tr*tr));
+	    float tephi = std::sqrt((ty*ty*tex*tex + tx*tx*tey*tey - 2.0f*tx*ty*Err[iI].At(itrack,0,1))/(tr*tr*tr*tr));
 	    if(std::isnan(tephi))
 	      tephi = -999.;
 	    float ht_dxy= std::hypot(hx-tx, hy-ty);
@@ -546,7 +546,7 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 		first = false;
 	      }
 	    
-	    if(!(std::isnan(phi)))
+	    if(!(std::isnan(phi)) && !(std::isnan(getEta(Par[iI].At(itrack,5,0)))))
 	      {
 		//|| std::isnan(ter) || std::isnan(her) || std::isnan(Chi2(itrack, 0, 0)) || std::isnan(hchi2)))
 		printf("HITWINDOWSEL "
