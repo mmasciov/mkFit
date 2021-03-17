@@ -354,9 +354,11 @@ namespace Config
   constexpr float track_ptlow = 0.9;
 
   // sorting config (bonus,penalty)
-  constexpr float validHitBonus_ = 10;
+  constexpr float validHitBonus_ = 4;
+  constexpr float validHitSlope_ = 0.2;
   constexpr float overlapHitBonus_ = 0; // set to negative for penalty
-  constexpr float missingHitPenalty_ = 10;
+  constexpr float missingHitPenalty_ = 8;
+  constexpr float tailMissingHitPenalty_ = 3;
 
   // Threading
   extern int    numThreadsFinder;
@@ -399,6 +401,13 @@ namespace Config
   constexpr bool nan_n_silly_check_cands_pre_bkfit  = true;
   constexpr bool nan_n_silly_check_cands_post_bkfit = true;
   constexpr bool nan_n_silly_print_bad_cands_bkfit  = false;
+
+  // ================================================================
+
+  extern bool        json_patch_dump_before;
+  extern bool        json_patch_dump_after;
+  extern bool        json_patch_verbose;
+  extern std::string json_patch_filename;
 
   // ================================================================
 
