@@ -21,8 +21,9 @@
 
 namespace mkfit {
 
-void MkFinder::Setup(const IterationParams &ip, const IterationLayerConfig &ilc, const std::vector<bool> *ihm)
+void MkFinder::Setup(const IterationConfig &ic, const IterationParams &ip, const IterationLayerConfig &ilc, const std::vector<bool> *ihm)
 {
+  m_iter_config            = &ic;
   m_iteration_params       = &ip;
   m_iteration_layer_config = &ilc;
   m_iteration_hit_mask     =  ihm;
@@ -30,6 +31,7 @@ void MkFinder::Setup(const IterationParams &ip, const IterationLayerConfig &ilc,
 
 void MkFinder::Release()
 {
+  m_iter_config            = nullptr;
   m_iteration_params       = nullptr;
   m_iteration_layer_config = nullptr;
   m_iteration_hit_mask     = nullptr;
@@ -156,38 +158,68 @@ void MkFinder::OutputTracksAndHitIdx(std::vector<Track>& tracks,
 //==============================================================================
 // getHitSelDynamicWindows
 //==============================================================================
-// From Config.h: track-related config on hit selection windows
-// constexpr float treg_eta[2] = {0.45,1.5};
-// constexpr float track_ptlow = 0.9;
+// From HitSelectionWindows.h: track-related config on hit selection windows
 
-void MkFinder::getHitSelDynamicWindows(const LayerOfHits &layer_of_hits, const float track_pt, const float track_eta, float &min_dq, float &max_dphi)
+void MkFinder::getHitSelDynamicWindows(const LayerOfHits &layer_of_hits, const float invpt, const float theta, float &min_dq, float &max_dq, float &min_dphi, float &max_dphi)
 {
-  const LayerOfHits          &L = layer_of_hits;
+  const IterationConfig      &IC  = *m_iter_config;
+  const LayerOfHits          &L   = layer_of_hits;
   const IterationLayerConfig &ILC = *m_iteration_layer_config;
 
-  if (L.is_tib_lyr() || L.is_tob_lyr())
-  {
-    if (track_eta > Config::treg_eta[0] && track_eta < Config::treg_eta[1])
-      min_dq *= ILC.m_qf_treg;
+  int itidx   = IC.m_iteration_index; 
+  int lid     = L.layer_id();
 
-    if (track_pt < Config::track_ptlow)
-      max_dphi *= ILC.m_phif_lpt_brl;
-  }
-  else if (L.is_tid_lyr() || L.is_tec_lyr())
-  {
-    if (track_pt < Config::track_ptlow)
-    {
+  float dq0 = Config::m_dq_params[itidx][lid][0];
+  float dq1 = Config::m_dq_params[itidx][lid][1];
+  float dq2 = Config::m_dq_params[itidx][lid][2];
+  min_dq = dq0*invpt+dq1*theta+dq2;
+  if(min_dq<=0)
+    min_dq = ILC.min_dq()
+  max_dq = 2.0f*min_dq;
 
-      if (track_eta > Config::treg_eta[0] && track_eta < Config::treg_eta[1])
-        max_dphi *= ILC.m_phif_lpt_treg;
+  float dp0 = Config::m_dp_params[itidx][lid][0];
+  float dp1 = Config::m_dp_params[itidx][lid][1];
+  float dp2 = Config::m_dp_params[itidx][lid][2];
+  min_dphi = dp0*invpt+dp1*theta+dp2;
+  if(min_dphi<=0)
+    min_dphi = ILC.min_dphi()
+  max_dphi = 2.0f*min_dphi;
 
-      else if (!(L.is_stereo_lyr()) && track_eta >= Config::treg_eta[1])
-        max_dphi *= ILC.m_phif_lpt_ec;
-    }
-    else if (!(L.is_stereo_lyr()) && track_eta > Config::treg_eta[0] && track_eta < Config::treg_eta[1])
-      max_dphi *= ILC.m_phif_treg;
-  }
+  //float c20 = HitSelectionWindows::m_c2_params[itidx][lid][0];
+  //float c21 = HitSelectionWindows::m_c2_params[itidx][lid][1];
+  //float c22 = HitSelectionWindows::m_c2_params[itidx][lid][2];
+  //max_c2   = c20*invpt+c21*theta+c22;
+
 }
+
+//void MkFinder::getHitSelDynamicWindows(const LayerOfHits &layer_of_hits, const float track_pt, const float track_eta, float &min_dq, float &max_dphi)
+//{
+//  const LayerOfHits          &L = layer_of_hits;
+//  const IterationLayerConfig &ILC = *m_iteration_layer_config;
+//
+//  if (L.is_tib_lyr() || L.is_tob_lyr())
+//  {
+//    if (track_eta > Config::treg_eta[0] && track_eta < Config::treg_eta[1])
+//      min_dq *= ILC.m_qf_treg;
+//
+//    if (track_pt < Config::track_ptlow)
+//      max_dphi *= ILC.m_phif_lpt_brl;
+//  }
+//  else if (L.is_tid_lyr() || L.is_tec_lyr())
+//  {
+//    if (track_pt < Config::track_ptlow)
+//    {
+//
+//      if (track_eta > Config::treg_eta[0] && track_eta < Config::treg_eta[1])
+//        max_dphi *= ILC.m_phif_lpt_treg;
+//
+//      else if (!(L.is_stereo_lyr()) && track_eta >= Config::treg_eta[1])
+//        max_dphi *= ILC.m_phif_lpt_ec;
+//    }
+//    else if (!(L.is_stereo_lyr()) && track_eta > Config::treg_eta[0] && track_eta < Config::treg_eta[1])
+//      max_dphi *= ILC.m_phif_treg;
+//  }
+//}
 
 //==============================================================================
 // SelectHitIndices
@@ -212,18 +244,30 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
   float dqv[NN], dphiv[NN], qv[NN], phiv[NN];
   int qb1v[NN], qb2v[NN], pb1v[NN], pb2v[NN];
 
+  float min_dq   = ILC.min_dq();
+  float max_dq   = ILC.max_dq();
+  float min_dphi = ILC.min_dphi();
+  float max_dphi = ILC.max_dphi();
+
   const auto assignbins = [&](int itrack, float q, float dq, float phi, float dphi){
 
-    float thisPt   = 1.0f/Par[iI].At(itrack,3,0);
-    float thisEta  = std::fabs( getEta( Par[iI].At(itrack,5,0) ) );
+    //float thisPt   = 1.0f/Par[iI].At(itrack,3,0);
+    //float thisEta  = std::fabs( getEta( Par[iI].At(itrack,5,0) ) );
     //
-    float min_dq   = ILC.min_dq();
-    float max_dphi = ILC.max_dphi();
+    //float min_dq   = ILC.min_dq();
+    //float max_dphi = ILC.max_dphi();
     //
-    getHitSelDynamicWindows(L, thisPt, thisEta, min_dq, max_dphi);
+    //getHitSelDynamicWindows(L, thisPt, thisEta, min_dq, max_dphi);
     //
-    dphi = std::min(std::abs(dphi), max_dphi);
-    dq   = clamp(dq, min_dq, ILC.max_dq());
+    //dphi = std::min(std::abs(dphi), max_dphi);
+    //dq   = clamp(dq, min_dq, ILC.max_dq());
+    
+    
+    float invpt = Par[iI].At(itrack,3,0);
+    float theta = std::fabs(Par[iI].At(itrack,5,0)-Config::PIOver2);
+    getHitSelDynamicWindows(L, invpt, theta, min_dq, max_dq, min_dphi, max_dphi);
+    dphi = clamp(std::abs(dphi), min_dphi, max_dphi);
+    dq   = clamp(dq, min_dq, max_dq);
 
     qv[itrack] = q;
     phiv[itrack] = phi;
@@ -242,8 +286,12 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
        2 * dphidx * dphidy * Err[iI].ConstAt(itrack, 0, 1);
   };
 
-  const auto calcdphi = [&](float dphi2) {
-    return std::max(nSigmaPhi * std::sqrt(std::abs(dphi2)), ILC.min_dphi());
+  const auto calcdphi = [&](int itrack, float dphi2) {
+    //return std::max(nSigmaPhi * std::sqrt(std::abs(dphi2)), ILC.min_dphi());
+    float invpt = Par[iI].At(itrack,3,0);
+    float theta = std::fabs(Par[iI].At(itrack,5,0)-Config::PIOver2);
+    getHitSelDynamicWindows(L, invpt, theta, min_dq, max_dq, min_dphi, max_dphi);
+    return std::max(nSigmaPhi * std::sqrt(std::abs(dphi2)), min_dphi);
   };
 
 
@@ -267,33 +315,33 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 #endif
 
       const float phi  = getPhi(x, y);
-      float dphi = calcdphi(dphi2);
+      float dphi = calcdphi(itrack, dphi2);
 
       const float z  = Par[iI].ConstAt(itrack, 2, 0);
       const float dz = std::abs(nSigmaZ * std::sqrt(Err[iI].ConstAt(itrack, 2, 2)));
       // XXX-NUM-ERR above, Err(2,2) gets negative!
-
-      if (Config::useCMSGeom) // should be Config::finding_requires_propagation_to_hit_pos
-      {
-        //now correct for bending and for layer thickness unsing linear approximation
-        //fixme! using constant value, to be taken from layer properties
-        //XXXXMT4GC should we also increase dz?
-        //XXXXMT4GC an we just take half od layer dR?
-        const float deltaR = Config::cmsDeltaRad;
-        const float r  = std::sqrt(r2);
-        //here alpha is the difference between posPhi and momPhi
-        const float alpha = phi - Par[iP].ConstAt(itrack, 4, 0);
-        float cosA, sinA;
-        if (Config::useTrigApprox) {
-          sincos4(alpha, sinA, cosA);
-        } else {
-          cosA = std::cos(alpha);
-          sinA = std::sin(alpha);
-        }
-        //take abs so that we always inflate the window
-        const float dist = std::abs(deltaR*sinA/cosA);
-        dphi += dist / r;
-      }
+      
+      //if (Config::useCMSGeom) // should be Config::finding_requires_propagation_to_hit_pos
+      //{
+      //  //now correct for bending and for layer thickness unsing linear approximation
+      //  //fixme! using constant value, to be taken from layer properties
+      //  //XXXXMT4GC should we also increase dz?
+      //  //XXXXMT4GC an we just take half od layer dR?
+      //  const float deltaR = Config::cmsDeltaRad;
+      //  const float r  = std::sqrt(r2);
+      //  //here alpha is the difference between posPhi and momPhi
+      //  const float alpha = phi - Par[iP].ConstAt(itrack, 4, 0);
+      //  float cosA, sinA;
+      //  if (Config::useTrigApprox) {
+      //    sincos4(alpha, sinA, cosA);
+      //  } else {
+      //    cosA = std::cos(alpha);
+      //    sinA = std::sin(alpha);
+      //  }
+      //  //take abs so that we always inflate the window
+      //  const float dist = std::abs(deltaR*sinA/cosA);
+      //  dphi += dist / r;
+      //}
 
       XWsrResult[itrack] = L.is_within_z_sensitive_region(z, dz);
       assignbins(itrack, z, dz, phi, dphi);
@@ -319,25 +367,25 @@ void MkFinder::SelectHitIndices(const LayerOfHits &layer_of_hits,
 #endif
 
       const float phi  = getPhi(x, y);
-      float dphi = calcdphi(dphi2);
+      float dphi = calcdphi(itrack, dphi2);
 
       const float  r = std::sqrt(r2);
       const float dr = std::abs(nSigmaR*(x*x*Err[iI].ConstAt(itrack, 0, 0) + y*y*Err[iI].ConstAt(itrack, 1, 1) + 2*x*y*Err[iI].ConstAt(itrack, 0, 1)) / r2);
 
-      if (Config::useCMSGeom) // should be Config::finding_requires_propagation_to_hit_pos
-      {
-        //now correct for bending and for layer thickness unsing linear approximation
-        //fixme! using constant value, to be taken from layer properties
-        //XXXXMT4GC should we also increase dr?
-        //XXXXMT4GC can we just take half of layer dz?
-        const float deltaZ = 5;
-        float cosT = std::cos(Par[iI].ConstAt(itrack, 5, 0));
-        float sinT = std::sin(Par[iI].ConstAt(itrack, 5, 0));
-        //here alpha is the helix angular path corresponding to deltaZ
-        const float k = Chg.ConstAt(itrack, 0, 0) * 100.f / (-Config::sol*Config::Bfield);
-        const float alpha  = deltaZ*sinT*Par[iI].ConstAt(itrack, 3, 0)/(cosT*k);
-        dphi += std::abs(alpha);
-      }
+      //if (Config::useCMSGeom) // should be Config::finding_requires_propagation_to_hit_pos
+      //{
+      //  //now correct for bending and for layer thickness unsing linear approximation
+      //  //fixme! using constant value, to be taken from layer properties
+      //  //XXXXMT4GC should we also increase dr?
+      //  //XXXXMT4GC can we just take half of layer dz?
+      //  const float deltaZ = 5;
+      //  float cosT = std::cos(Par[iI].ConstAt(itrack, 5, 0));
+      //  float sinT = std::sin(Par[iI].ConstAt(itrack, 5, 0));
+      //  //here alpha is the helix angular path corresponding to deltaZ
+      //  const float k = Chg.ConstAt(itrack, 0, 0) * 100.f / (-Config::sol*Config::Bfield);
+      //  const float alpha  = deltaZ*sinT*Par[iI].ConstAt(itrack, 3, 0)/(cosT*k);
+      //  dphi += std::abs(alpha);
+      //}
       XWsrResult[itrack] = L.is_within_r_sensitive_region(r, dr);
       assignbins(itrack, r, dr, phi, dphi);
     }
