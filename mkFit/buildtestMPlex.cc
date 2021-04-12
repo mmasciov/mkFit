@@ -412,7 +412,7 @@ double runBtbCe_MultiIter(Event& ev, const EventOfHits &eoh, MkBuilder& builder,
       continue;
     
     builder.seed_post_cleaning(seeds, true, true);
-    builder.map_track_hits(seeds);
+
     for (auto &s : seeds) assignSeedTypeForRanking(s);
 
     builder.find_tracks_load_seeds(seeds);
@@ -527,8 +527,6 @@ void run_OneIteration(const TrackerInfo& trackerInfo, const IterationConfig &itc
   // the track parameter coordinate transformation.
   builder.seed_post_cleaning(seeds, true, true);
 
-  StdSeq::Cmssw_Map_TrackHitIndices(eoh, seeds);
-
   for (auto &s : seeds) assignSeedTypeForRanking(s);
 
   builder.find_tracks_load_seeds(seeds);
@@ -550,8 +548,6 @@ void run_OneIteration(const TrackerInfo& trackerInfo, const IterationConfig &itc
     // builder.BackwardFit();
     // builder.export_best_comb_cands(out_tracks);
   }
-
-  StdSeq::Cmssw_ReMap_TrackHitIndices(eoh, out_tracks);
 
   if (do_remove_duplicates)
   {
